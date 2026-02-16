@@ -1,25 +1,34 @@
 package main
 
-import "net"
-import "log"
+import (
+	"log"
+	"net"
+	"time"
+)
 
+const (
+	protocol       string = "tcp"
+	address        string = "localhost:8080"
+	expectedAnswer string = "OK\n"
+)
 
-
-func main(){
-	conn, err := net.Dial("tcp", "localhost:8080")
-	if err != nil{
-		log.Println("Ошибка подключения к серверу: ", err)
+func main() {
+	conn, err := net.Dial(protocol, address)
+	if err != nil {
+		log.Println("Connection error: ", err)
 		return
 	}
 	defer conn.Close()
 
 	var ans []byte
+	conn.SetReadDeadline(time.Now().Add(time.Second * 5))
 	_, err = conn.Read(ans)
-	if err != nil{
-		log.Println("Не удалось прочитать ответ от сервера: ", err)
+
+	if err != nil {
+		log.Println("Unable to read server-answer: ", err)
 		return
 	}
-	if string(ans) != "OK\n"{
-		log.Println("От сервера получен неверный ответ: ", string(ans))
+	if string(ans) != expectedAnswer {
+		log.Println("Wrong server-answer received: ", string(ans))
 	}
 }

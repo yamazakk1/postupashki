@@ -1,39 +1,45 @@
 package main
 
 import (
-	"log"
-	"net"
+  "log"
+  "net"
 )
 
 
+const(
+  port string = ":8080"
+  protocol string = "tcp"
+  payload string = "OK\n"
+)
+
 func main() {
-	listener, err := net.Listen("tcp", ":8080")
-	if err != nil {
-		log.Println("Ошибка при запуске сервера: ", err)
-		return
-	}
-	defer listener.Close()
+  listener, err := net.Listen(protocol, port)
+  if err != nil {
+    log.Println("Unable to start server: ", err)
+    return
+  }
+  defer listener.Close()
 
-	log.Println("Сервер запущен на порту 8080")
+  log.Println("Server started at localhost:8080")
 
-	for {
-		conn, err := listener.Accept()
-		if err != nil {
-			log.Println("Ошибка принятия соедиинения: ", err)
-			continue
-		}
+  for {
+    conn, err := listener.Accept()
+    if err != nil {
+      log.Println("Connection receiving error: ", err)
+      continue
+    }
 
-		go handleConnection(conn)
+    go handleConnection(conn)
 
-	}
+  }
 }
 
 func handleConnection(conn net.Conn) {
-	defer conn.Close()
-	_, err := conn.Write([]byte("OK\n"))
-	if err != nil {
-		log.Println("Ошибка отправки ответа: ", err)
-		return
-	}
-	log.Println("Ответ отправлен, соединение закрывается йоу")
+  defer conn.Close()
+  _, err := conn.Write([]byte(payload))
+  if err != nil {
+    log.Println("Unable to write answer: ", err)
+    return
+  }
+  log.Println("Answer sent!")
 }
